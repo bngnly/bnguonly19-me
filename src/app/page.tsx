@@ -1,8 +1,8 @@
-import { getRandomPhotos } from "@/services/PhotosService";
+// import { getRandomPhotos } from "@/services/PhotosService";
 import Image from "next/image";
 
 export default async function HomePage() {
-  const randomPhotos = await getRandomPhotos(5);
+  // const randomPhotos = await getRandomPhotos(5);
 
   return (
     <div className="w-[90vw] space-y-[2vh]">
@@ -23,7 +23,7 @@ export default async function HomePage() {
       <p className="text-center">
         Here are Some Random Photos (Until I Figure Out What Else to Put Here):
       </p>
-      {randomPhotos ? (
+      {/* {randomPhotos ? (
         <Image
           src={randomPhotos[0]!.url}
           alt="Photo of me"
@@ -32,7 +32,7 @@ export default async function HomePage() {
         ></Image>
       ) : (
         <p>cannot get photos</p>
-      )}
+      )} */}
     </div>
   );
 }
