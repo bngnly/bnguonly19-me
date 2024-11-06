@@ -1,8 +1,8 @@
-// import { getRandomPhotos } from "@/services/PhotosService";
+import { getRandomPhotos } from "@/services/PhotosService";
 import Image from "next/image";
 
 export default async function HomePage() {
-  // const randomPhotos = await getRandomPhotos(5);
+  const randomPhotos = await getRandomPhotos(5);
 
   return (
     <div className="w-[90vw] space-y-[2vh]">
@@ -10,9 +10,9 @@ export default async function HomePage() {
         <Image
           src="/my_headshot.jpg"
           alt="Photo of me"
-          layout="fill"
-          objectFit="contain"
-        ></Image>
+          fill
+          style={{ objectFit: "contain" }}
+        />
       </div>
       <p className="text-center">
         Since graduating college I&apos;ve been fortunate enough to travel.
@@ -23,16 +23,29 @@ export default async function HomePage() {
       <p className="text-center">
         Here are Some Random Photos (Until I Figure Out What Else to Put Here):
       </p>
-      {/* {randomPhotos ? (
-        <Image
-          src={randomPhotos[0]!.url}
-          alt="Photo of me"
-          layout="fill"
-          objectFit="contain"
-        ></Image>
+      {randomPhotos ? (
+        <div>
+          {randomPhotos.map((photo, _index) => {
+            return (
+              <div className="relative h-[30vh] my-0.5" key={_index}>
+                <Image
+                  src={photo.url}
+                  alt="Photo of me"
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </div>
+            );
+          })}
+        </div>
       ) : (
-        <p>cannot get photos</p>
-      )} */}
+        <Image
+          src="/modelo_cat.jpg"
+          alt="Error retrieving images"
+          fill
+          style={{ objectFit: "contain" }}
+        />
+      )}
     </div>
   );
 }

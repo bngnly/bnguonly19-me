@@ -1,8 +1,11 @@
 import s3client from "@/clients/s3client";
+import { Photo } from "@/types/types";
 import { GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export const getRandomPhotos = async (quantity: number) => {
+export const getRandomPhotos = async (
+  quantity: number
+): Promise<Photo[] | undefined> => {
   try {
     const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_BUCKET,
@@ -43,18 +46,21 @@ export const getRandomPhotos = async (quantity: number) => {
           }
         })
       );
-      return photos;
+      const photosFiltered = photos.filter((photo) => photo !== undefined);
+      return photosFiltered;
     }
   } catch (e) {
     console.log(e);
   }
 };
 
-export const getAlbumPhotos = async (album: string) => {
+export const getAlbumPhotos = async (
+  album: string
+): Promise<Photo[] | undefined> => {
   try {
     const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_BUCKET,
-      Prefix: album + '/',
+      Prefix: album + "/",
     });
     const s3res = await s3client.send(command);
     const photos = await Promise.all(

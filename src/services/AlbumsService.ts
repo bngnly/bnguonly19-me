@@ -1,7 +1,9 @@
 import s3client from "@/clients/s3client";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 
-export const getAllAlbums = async () => {
+export const getAllAlbums = async (): Promise<
+  (string | undefined)[] | undefined
+> => {
   try {
     const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_BUCKET,
