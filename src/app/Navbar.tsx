@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Home, YouTube, Menu } from "@mui/icons-material";
+import { Home, YouTube, Menu, Collections } from "@mui/icons-material";
 import { useState } from "react";
 
 export default function Navbar() {
@@ -10,9 +10,14 @@ export default function Navbar() {
     <>
       <nav className="">
         <div className="flex justify-between hidden md:flex">
-          <Link href="/">
-            <Home />
-          </Link>
+          <div>
+            <Link href="/">
+              <Home />
+            </Link>
+            <Link href="/albums">
+              <Collections />
+            </Link>
+          </div>
           <Link href="https://www.youtube.com/@bngnly" target="_blank">
             <YouTube />
           </Link>
@@ -26,6 +31,9 @@ export default function Navbar() {
             <div className="absolute flex flex-col z-100">
               <Link href="/">
                 <Home />
+              </Link>
+              <Link href="/albums">
+                <Collections />
               </Link>
               <Link href="https://www.youtube.com/@bngnly" target="_blank">
                 <YouTube />

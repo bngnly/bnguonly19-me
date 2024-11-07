@@ -23,6 +23,7 @@ export default async function HomePage() {
       <p className="text-center">
         Here are Some Random Photos (Until I Figure Out What Else to Put Here):
       </p>
+
       {randomPhotos ? (
         <div>
           {randomPhotos.map((photo, _index) => {
@@ -39,12 +40,14 @@ export default async function HomePage() {
           })}
         </div>
       ) : (
-        <Image
-          src="/modelo_cat.jpg"
-          alt="Error retrieving images"
-          fill
-          style={{ objectFit: "contain" }}
-        />
+        <div className="relative h-[30vh]">
+          <Image
+            src="/modelo_cat.jpg"
+            alt="Error retrieving images"
+            fill
+            style={{ objectFit: "contain" }}
+          />
+        </div>
       )}
     </div>
   );

@@ -76,7 +76,7 @@ export const getAlbumPhotos = async (
         return photo;
       })
     );
-    console.log(photos);
+    // console.log(photos);
     return photos;
   } catch (error) {
     console.log(error);
