@@ -5,18 +5,16 @@ import Image from "next/image";
 
 export const revalidate = 2592000;
 
-export async function generateStaticParams() {
-  const albums = await getAllAlbums();
+export async function generateStaticParams(): Promise<{ album: string }[]> {
+  const awsAlbums = await getAllAlbums();
 
-  return albums?.map((album) => ({
-    album,
-  }));
+  return awsAlbums?.map((awsAlbum) => ({ album: String(awsAlbum) })) ?? [];
 }
 
 export default async function AlbumPage({
   params,
 }: {
-  params: { album: string };
+  params: Promise<{ album: string }>;
 }) {
   const album = (await params).album;
   const photos: Photo[] | undefined = await getAlbumPhotos(album);
