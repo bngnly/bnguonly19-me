@@ -3,6 +3,8 @@ import { getAlbumPhotos } from "@/services/PhotosService";
 import { Photo } from "@/types/types";
 import Image from "next/image";
 
+export const revalidate = 2592000;
+
 export async function generateStaticParams() {
   const albums = await getAllAlbums();
 
@@ -30,7 +32,7 @@ export default async function AlbumPage({
             <div key={_index} className="relative w-full h-[70vh]">
               <Image
                 src={photo.url}
-                alt="Error retrieving images"
+                alt="Error retrieving image"
                 fill
                 style={{ objectFit: "contain" }}
               />
