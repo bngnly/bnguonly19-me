@@ -1,9 +1,10 @@
 import { getRandomPhotos } from "@/services/PhotosService";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const randomPhotos = await getRandomPhotos(5);
-
   return (
     <div className="w-[90vw] space-y-[2vh]">
       <div className="relative h-[30vh]">
@@ -24,7 +25,7 @@ export default async function HomePage() {
         Here are Some Random Photos (Until I Figure Out What Else to Put Here):
       </p>
 
-      {randomPhotos ? (
+      {randomPhotos.length > 0 ? (
         <div>
           {randomPhotos.map((photo, _index) => {
             return (

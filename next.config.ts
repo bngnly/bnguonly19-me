@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: `${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`,
+        hostname: `${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net`,
         pathname: "/**",
       },
     ],

@@ -2,12 +2,14 @@ import { getAllAlbums } from "@/services/AlbumsService";
 import Image from "next/image";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function AlbumsPage() {
   const albums = await getAllAlbums();
 
   return (
     <div className="w-[90vw]">
-      {albums ? (
+      {albums.length > 0 ? (
         albums.map((album, _index) => {
           return (
             <div key={_index}>
