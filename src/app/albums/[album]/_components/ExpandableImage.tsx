@@ -15,7 +15,7 @@ export default function ExpandableImage({ photo }: ExpandableImageProps) {
   return (
     <>
       <Image
-        className="contain"
+        className="contain hover:cursor-zoom-in"
         src={photo.url}
         alt={photo.url}
         fill
@@ -24,7 +24,7 @@ export default function ExpandableImage({ photo }: ExpandableImageProps) {
       />
 
       <Dialog
-        className="flex items-center justify-center bg-black/80"
+        className="flex items-center justify-center bg-black/80 hover:cursor-zoom-out"
         open={open}
         fullScreen
         onClick={() => setOpen(false)}
@@ -42,7 +42,7 @@ export default function ExpandableImage({ photo }: ExpandableImageProps) {
             height={9000}
             width={9000}
             sizes="100vw"
-            className="max-w-screen max-h-screen w-auto h-auto p-4"
+            className="max-w-screen max-h-screen w-auto h-auto p-4 hover:cursor-default"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
