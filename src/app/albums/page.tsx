@@ -1,22 +1,20 @@
 import { getAllAlbums } from "@/services/AlbumsService";
 import Image from "next/image";
-import Link from "next/link";
+import AlbumCard from "./_components/AlbumCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AlbumsPage() {
-  const albums = await getAllAlbums();
+  const albumNames: string[] = await getAllAlbums();
 
   return (
-    <div className="w-[90vw]">
-      {albums.length > 0 ? (
-        albums.map((album, _index) => {
-          return (
-            <div key={_index}>
-              <Link href={`/albums/${album}`}>{album}</Link>
-            </div>
-          );
-        })
+    <div className="w-[90vw] grid grid-cols-1 md:grid-cols-2 gap-6">
+      {albumNames.length > 0 ? (
+        albumNames.reverse().map((albumName, _index) => (
+          <div key={_index}>
+            <AlbumCard albumName={albumName} />
+          </div>
+        ))
       ) : (
         <div className="relative h-[30vh]">
           <Image
