@@ -2,6 +2,7 @@ import { getAllAlbums } from "@/services/AlbumsService";
 import { getAlbumPhotos } from "@/services/PhotosService";
 import { Photo } from "@/types/types";
 import Image from "next/image";
+import ExpandableImage from "./_components/ExpandableImage";
 
 export const revalidate = 604800;
 
@@ -28,12 +29,7 @@ export default async function AlbumPage({
         <div className="grid sm: grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo, _index) => (
             <div key={_index} className="relative w-full h-[70vh]">
-              <Image
-                src={photo.url}
-                alt="Error retrieving image"
-                fill
-                style={{ objectFit: "contain" }}
-              />
+              <ExpandableImage photo={photo} />
             </div>
           ))}
         </div>

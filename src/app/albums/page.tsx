@@ -21,7 +21,7 @@ export default async function AlbumsPage() {
         <div className="relative h-[30vh]">
           <Image
             src="/modelo_cat.jpg"
-            alt="Error retrieving images"
+            alt="Error retrieving albums"
             fill
             style={{ objectFit: "contain" }}
           />
