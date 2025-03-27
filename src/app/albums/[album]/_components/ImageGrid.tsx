@@ -10,6 +10,7 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
     null
   );
   const [open, setOpen] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const closeImage = () => {
     setOpen(false);
@@ -59,6 +60,26 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
     };
   }, [open, keyboardShortCuts]);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const swipeDistance = touchStartX - touchEndX;
+
+    if (swipeDistance > 35) {
+      incrementCurrentPhotoIndex();
+    }
+    else if (swipeDistance < -35) {
+      decrementCurrentPhotoIndex();
+    }
+
+    setTouchStartX(null);
+  };
+
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Dialog
@@ -67,6 +88,8 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
         fullScreen
         onClick={() => setOpen(false)}
         onClose={closeImage}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         PaperProps={{
           style: { backgroundColor: "transparent", boxShadow: "none" },
         }}
