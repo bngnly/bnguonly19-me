@@ -2,7 +2,7 @@ import { getAllAlbums } from "@/services/AlbumsService";
 import { getAlbumPhotos } from "@/services/PhotosService";
 import { Photo } from "@/types/types";
 import Image from "next/image";
-import ExpandableImage from "./_components/ExpandableImage";
+import ImageGrid from "@/app/albums/[album]/_components/ImageGrid";
 
 export const revalidate = 604800;
 
@@ -26,15 +26,9 @@ export default async function AlbumPage({
         {album} ({photos ? photos.length : 0})
       </h1>
       {photos.length > 0 ? (
-        <div className="grid sm: grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-          {photos.map((photo, _index) => (
-            <div key={_index} className="relative w-full h-[70vh]">
-              <ExpandableImage photo={photo} />
-            </div>
-          ))}
-        </div>
+        <ImageGrid photos={photos} />
       ) : (
-        <div className="">
+        <div>
           <Image
             src="/modelo_cat.jpg"
             alt="Error retrieving images"
