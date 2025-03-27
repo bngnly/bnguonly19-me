@@ -4,6 +4,8 @@ import { Photo } from "@/types/types";
 import { Dialog } from "@mui/material";
 import Image from "next/image";
 import { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton } from "@mui/material";
 
 interface ExpandableImageProps {
   photo: Photo;
@@ -24,7 +26,7 @@ export default function ExpandableImage({ photo }: ExpandableImageProps) {
       />
 
       <Dialog
-        className="flex items-center justify-center bg-black/80 hover:cursor-zoom-out"
+        className="flex items-center justify-center bg-black/80"
         open={open}
         fullScreen
         onClick={() => setOpen(false)}
@@ -32,6 +34,14 @@ export default function ExpandableImage({ photo }: ExpandableImageProps) {
           style: { backgroundColor: "transparent", boxShadow: "none" },
         }}
       >
+        {open && (
+          <IconButton
+            onClick={() => setOpen(false)}
+            className="fixed top-4 right-4"
+          >
+            <CloseIcon sx={{ color: "white" }} />
+          </IconButton>
+        )}
         <div
           className="w-full h-full flex items-center justify-center bg-black/80"
           onClick={() => setOpen(false)}
