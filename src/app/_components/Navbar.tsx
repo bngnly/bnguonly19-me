@@ -23,7 +23,14 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 export default function Navbar() {
   return (
     <HideOnScroll>
-      <AppBar className="bg-purple-600 min-h-[5vh] justify-center px-[1vw]">
+      <AppBar
+        sx={{
+          backgroundColor: "#9333ea",
+          minHeight: "5vh",
+          justifyContent: "center",
+          paddingX: "1vh",
+        }}
+      >
         <div className="flex justify-between">
           <div className="space-x-[1vh]">
             <Link href="/">
@@ -33,10 +40,7 @@ export default function Navbar() {
               <Collections />
             </Link>
           </div>
-          <Link
-            href="https://www.youtube.com/@bngnly"
-            target="_blank"
-          >
+          <Link href="https://www.youtube.com/@bngnly" target="_blank">
             <YouTube />
           </Link>
         </div>
