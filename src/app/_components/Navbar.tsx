@@ -52,7 +52,7 @@ export default function Navbar() {
             >
               <YouTube />
             </IconButton>
-            {session?.user ? (
+            {!session?.user ? (
               <IconButton
                 onClick={() => {
                   signIn();
