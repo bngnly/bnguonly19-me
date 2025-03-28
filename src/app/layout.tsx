@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/app/_components/Navbar";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "bnguonly19-me",
@@ -16,8 +17,10 @@ export default function RootLayout({
     <>
       <html lang="en">
         <body>
-          <Navbar />
-          <div className="flex justify-center pt-[6vh]">{children}</div>
+          <SessionProvider>
+            <Navbar />
+            <div className="flex justify-center pt-[6vh]">{children}</div>
+          </SessionProvider>
         </body>
       </html>
     </>

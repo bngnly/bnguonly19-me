@@ -1,8 +1,9 @@
 "use client";
-import Link from "next/link";
-import { Home, YouTube, Collections } from "@mui/icons-material";
-import { AppBar, Slide, useScrollTrigger } from "@mui/material";
+import { Home, YouTube, Collections, Login, Logout } from "@mui/icons-material";
+import { AppBar, IconButton, Slide, useScrollTrigger } from "@mui/material";
 import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 interface HideOnScrollProps {
   children: ReactNode;
@@ -21,6 +22,9 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 }
 
 export default function Navbar() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
   return (
     <HideOnScroll>
       <AppBar
@@ -32,17 +36,40 @@ export default function Navbar() {
         }}
       >
         <div className="flex justify-between">
-          <div className="space-x-[1vh]">
-            <Link href="/">
+          <div className="space-x-[1vw]">
+            <IconButton onClick={() => router.push("/")}>
               <Home />
-            </Link>
-            <Link href="/albums">
+            </IconButton>
+            <IconButton onClick={() => router.push("/albums")}>
               <Collections />
-            </Link>
+            </IconButton>
           </div>
-          <Link href="https://www.youtube.com/@bngnly" target="_blank">
-            <YouTube />
-          </Link>
+          <div className="space-x-[1vw]">
+            <IconButton
+              onClick={() =>
+                window.open("https://www.youtube.com/@bngnly", "_blank")
+              }
+            >
+              <YouTube />
+            </IconButton>
+            {session?.user ? (
+              <IconButton
+                onClick={() => {
+                  signIn();
+                }}
+              >
+                <Login />
+              </IconButton>
+            ) : (
+              <IconButton
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                <Logout />
+              </IconButton>
+            )}
+          </div>
         </div>
       </AppBar>
     </HideOnScroll>
