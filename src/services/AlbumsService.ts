@@ -1,10 +1,15 @@
+"use server";
+
+import { auth } from "@/auth";
 import s3client from "@/clients/s3client";
 import {
   ListObjectsV2Command,
   ListObjectsV2CommandOutput,
+  PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { revalidatePath } from "next/cache";
 
-export const getAllAlbums = async (): Promise<string[]> => {
+export const getAllAlbumNames = async (): Promise<string[]> => {
   const albums = [];
 
   try {
@@ -31,3 +36,26 @@ export const getAllAlbums = async (): Promise<string[]> => {
   console.log(`Retrieved ${albums.length} albums`);
   return albums;
 };
+
+export async function createAlbum(albumName: string) {
+  const session = await auth();
+  if (!session || !session.user?.isAdmin) {
+    throw new Error("Unauthorized");
+  }
+
+  const folderName = albumName.trim();
+
+  if (!folderName || folderName.includes("..") || folderName.includes("//")) {
+    throw new Error("Invalid folder name");
+  }
+
+  await s3client.send(
+    new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET,
+      Key: `${folderName}/`,
+      Body: Buffer.alloc(0),
+    })
+  );
+
+  revalidatePath("/upload");
+}

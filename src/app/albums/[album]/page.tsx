@@ -1,4 +1,4 @@
-import { getAllAlbums } from "@/services/AlbumsService";
+import { getAllAlbumNames } from "@/services/AlbumsService";
 import { getAlbumPhotos } from "@/services/PhotosService";
 import { Photo } from "@/types/types";
 import Image from "next/image";
@@ -7,9 +7,9 @@ import ImageGrid from "@/app/albums/[album]/_components/ImageGrid";
 export const revalidate = 604800;
 
 export async function generateStaticParams(): Promise<{ album: string }[]> {
-  const awsAlbums = await getAllAlbums();
+  const albumNames = await getAllAlbumNames();
 
-  return awsAlbums.map((awsAlbum) => ({ album: String(awsAlbum) })) ?? [];
+  return albumNames.map((albumName) => ({ album: String(albumName) })) ?? [];
 }
 
 export default async function AlbumPage({

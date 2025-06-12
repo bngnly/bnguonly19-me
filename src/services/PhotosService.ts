@@ -1,3 +1,5 @@
+"use server";
+
 import s3client from "@/clients/s3client";
 import { Photo } from "@/types/types";
 import {
@@ -5,9 +7,7 @@ import {
   ListObjectsV2CommandOutput,
 } from "@aws-sdk/client-s3";
 
-export const getRandomPhotos = async (
-  quantity: number
-): Promise<Photo[]> => {
+export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
   const allKeys: string[] = [];
 
   try {
@@ -30,7 +30,7 @@ export const getRandomPhotos = async (
   } catch (error) {
     console.log(error);
   }
-  
+
   const photoKeys = allKeys.filter((key) => {
     if (key) {
       const lowerCaseKey = key.toLowerCase();
