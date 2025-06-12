@@ -78,8 +78,20 @@ export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
   } catch (error) {
     console.log(error);
   }
-  console.log(`${album}: ${keys.length}`);
-  return keys.map((key) => {
+
+  const photoKeys = keys.filter((key) => {
+    if (key) {
+      const lowerCaseKey = key.toLowerCase();
+      return (
+        lowerCaseKey.endsWith(".jpeg") ||
+        lowerCaseKey.endsWith(".jpg") ||
+        lowerCaseKey.endsWith(".png")
+      );
+    }
+  });
+
+  console.log(`${album}: ${photoKeys.length}`);
+  return photoKeys.map((key) => {
     return {
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
       album,
