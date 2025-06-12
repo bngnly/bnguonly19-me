@@ -1,5 +1,12 @@
 "use client";
-import { Home, YouTube, Collections, Login, Logout } from "@mui/icons-material";
+import {
+  Home,
+  YouTube,
+  Collections,
+  Login,
+  Logout,
+  AddToPhotos,
+} from "@mui/icons-material";
 import { AppBar, IconButton, Slide, useScrollTrigger } from "@mui/material";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -52,6 +59,11 @@ export default function Navbar() {
             >
               <YouTube />
             </IconButton>
+            {session?.user && (
+              <IconButton onClick={() => router.push("/upload")}>
+                <AddToPhotos />
+              </IconButton>
+            )}
             {!session?.user ? (
               <IconButton
                 onClick={() => {
