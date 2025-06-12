@@ -1,6 +1,5 @@
 "use client";
 
-import { uploadPhotoToAlbumSorted } from "@/services/PhotosService";
 import { AddPhotoAlternate, FileUpload } from "@mui/icons-material";
 import {
   CircularProgress,
