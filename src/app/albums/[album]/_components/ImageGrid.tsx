@@ -18,7 +18,10 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
 
   const closeImage = () => {
     setOpen(false);
-    setCurrentPhotoIndex(null);
+    setTimeout(() => {
+      const target = document.getElementById(`photo-${currentPhotoIndex}`);
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
   };
 
   const decrementCurrentPhotoIndex = useCallback(() => {
@@ -128,7 +131,11 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
       </Dialog>
 
       {photos.map((photo, index) => (
-        <div key={index} className="relative w-full h-[70vh]">
+        <div
+          key={index}
+          id={`photo-${index}`}
+          className="relative w-full h-[70vh]"
+        >
           <Image
             className="hover:cursor-zoom-in"
             src={photo.url}
