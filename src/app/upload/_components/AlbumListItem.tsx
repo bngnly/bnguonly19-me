@@ -34,6 +34,9 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
     const latitude = exif?.latitude?.toFixed(5) ?? "unknown";
     const longitude = exif?.longitude?.toFixed(5) ?? "unknown";
 
+    console.log("File:", file);
+    console.log("EXIF:", await exifr.parse(file));
+
     return {
       name: file.name,
       timestamp,
