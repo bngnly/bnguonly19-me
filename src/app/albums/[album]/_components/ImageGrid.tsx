@@ -12,7 +12,9 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
     null
   );
   const [open, setOpen] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   const closeImage = () => {
     setOpen(false);
@@ -51,10 +53,10 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
   );
 
   useEffect(() => {
+    const handler = (event: KeyboardEvent) => keyboardShortCuts(event);
+
     if (open) {
-      window.addEventListener("keydown", keyboardShortCuts);
-    } else {
-      window.removeEventListener("keydown", keyboardShortCuts);
+      window.addEventListener("keydown", handler);
     }
 
     return () => {
@@ -63,22 +65,33 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
   }, [open, keyboardShortCuts]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
+    if (!touchStart) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touchStart.x - touch.clientX;
+    const deltaY = touchStart.y - touch.clientY;
 
-    const touchEndX = e.changedTouches[0].clientX;
-    const swipeDistance = touchStartX - touchEndX;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    if (swipeDistance > 35) {
-      incrementCurrentPhotoIndex();
-    } else if (swipeDistance < -35) {
-      decrementCurrentPhotoIndex();
+    const SWIPE_THRESHOLD = 35;
+    const VERTICAL_THRESHOLD = 60;
+
+    if (absX > SWIPE_THRESHOLD && absX > absY) {
+      if (deltaX > 0) {
+        incrementCurrentPhotoIndex();
+      } else {
+        decrementCurrentPhotoIndex();
+      }
+    } else if (deltaY < -VERTICAL_THRESHOLD && absY > absX) {
+      closeImage();
     }
 
-    setTouchStartX(null);
+    setTouchStart(null);
   };
 
   return (
@@ -87,8 +100,6 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
         className="flex items-center justify-center bg-black/80"
         open={open}
         fullScreen
-        onClick={() => setOpen(false)}
-        onClose={closeImage}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         PaperProps={{
@@ -100,10 +111,7 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
             <CloseIcon sx={{ color: "white" }} />
           </IconButton>
         )}
-        <div
-          className="w-full h-full flex items-center justify-center bg-black/80"
-          onClick={() => setOpen(false)}
-        >
+        <div className="w-full h-full flex items-center justify-center bg-black/80">
           <Image
             src={
               currentPhotoIndex !== null
