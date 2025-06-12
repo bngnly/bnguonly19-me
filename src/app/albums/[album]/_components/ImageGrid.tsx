@@ -107,11 +107,11 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
         }}
       >
         {open && (
-          <IconButton onClick={closeImage} className="fixed top-4 right-4">
+          <IconButton onClick={closeImage} className="fixed top-4 right-4 z-20">
             <CloseIcon sx={{ color: "white" }} />
           </IconButton>
         )}
-        <div className="w-full h-full flex items-center justify-center bg-black/80">
+        <div className="relative w-screen h-screen flex items-center justify-center bg-black/80">
           <Image
             src={
               currentPhotoIndex !== null
@@ -119,10 +119,9 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
                 : "/modelo_cat.jpg"
             }
             alt={"Expanded image"}
-            height={9000}
-            width={9000}
+            fill
             sizes="100vw"
-            className="max-w-screen max-h-screen w-auto h-auto p-4 hover:cursor-default"
+            className="object-contain p-2 hover:cursor-default"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
