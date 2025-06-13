@@ -5,9 +5,11 @@ import {
   CircularProgress,
   IconButton,
   ListItem,
+  ListItemButton,
   ListItemText,
 } from "@mui/material";
 import exifr from "exifr";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface AlbumListItemProps {
@@ -17,6 +19,7 @@ interface AlbumListItemProps {
 export default function AlbumListItem({ albumName }: AlbumListItemProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState<number | null>(null);
+  const router = useRouter();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -93,10 +96,13 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
 
   return (
     <ListItem className="border-b">
-      <ListItemText
-        primary={albumName}
-        secondary={`Files Selected: ${selectedFiles.length}`}
-      />
+      <ListItemButton>
+        <ListItemText
+          primary={albumName}
+          secondary={`Files Selected: ${selectedFiles.length}`}
+          onClick={() => router.push(`/albums/${albumName}`)}
+        />
+      </ListItemButton>
       <IconButton component="label">
         <AddPhotoAlternate />
         <input
