@@ -1,28 +1,21 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/app/_components/Navbar";
-import { SessionProvider } from "next-auth/react";
+import ClientLayout from "./_components/ClientLayout";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "bnguonly19-me",
   description: "What I've Been Up To",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <>
-      <html lang="en">
-        <body>
-          <SessionProvider>
-            <Navbar />
-            <div className="flex justify-center pt-[6vh]">{children}</div>
-          </SessionProvider>
-        </body>
-      </html>
-    </>
+    <html lang="en">
+      <body>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
+    </html>
   );
 }

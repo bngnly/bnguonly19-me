@@ -6,6 +6,7 @@ import {
   Login,
   Logout,
   AddToPhotos,
+  LocationOnTwoTone,
 } from "@mui/icons-material";
 import { AppBar, IconButton, Slide, useScrollTrigger } from "@mui/material";
 import { ReactNode } from "react";
@@ -49,6 +50,9 @@ export default function Navbar() {
             </IconButton>
             <IconButton onClick={() => router.push("/albums")}>
               <Collections />
+            </IconButton>
+            <IconButton onClick={() => router.push("/map")}>
+              <LocationOnTwoTone />
             </IconButton>
           </div>
           <div className="space-x-[1vw]">
