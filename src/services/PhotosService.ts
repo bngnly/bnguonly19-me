@@ -3,9 +3,12 @@
 import s3client from "@/clients/s3client";
 import { Photo } from "@/types/types";
 import {
+  DeleteObjectCommand,
   ListObjectsV2Command,
   ListObjectsV2CommandOutput,
 } from "@aws-sdk/client-s3";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
   const allKeys: string[] = [];
@@ -48,6 +51,7 @@ export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
   console.log(`Retrieved ${selectedKeys.length} random photos`);
   return selectedKeys.map((key) => {
     return {
+      key,
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
       album: key.split("/")[0] + "/",
     };
@@ -93,8 +97,34 @@ export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
   console.log(`Retrieved ${album} with ${photoKeys.length} photos`);
   return photoKeys.map((key) => {
     return {
+      key,
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
       album,
     };
   });
 };
+
+export async function deletePhoto(photoKey: string) {
+  const session = await auth();
+
+  if (!session?.user?.isAdmin) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    await s3client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key: photoKey,
+      })
+    );
+    const albumName = photoKey.split("/")[0];
+    revalidatePath(`/albums/${albumName}`);
+    console.log(`Deleted photo: ${photoKey} by ${session.user.name}`);
+
+    return { success: true };
+  } catch (err) {
+    console.error("S3 delete error:", err);
+    throw new Error("Failed to delete photo");
+  }
+}

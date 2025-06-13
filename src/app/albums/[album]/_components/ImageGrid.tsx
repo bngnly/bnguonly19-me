@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Dialog } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
+import DeleteImageButton from "./DeleteImageButton";
 
 export default function ImageGrid({ photos }: { photos: Photo[] }) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number | null>(
@@ -132,14 +133,17 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
 
       {photos.map((photo, index) => (
         <div
-          key={index}
+          key={photo.key}
           id={`photo-${index}`}
           className="relative w-full h-[70vh]"
         >
+          <div className="absolute top-2 right-2 z-10">
+            <DeleteImageButton photoKey={photo.key} />
+          </div>
           <Image
             className="hover:cursor-zoom-in"
             src={photo.url}
-            alt={photo.url}
+            alt={photo.key}
             fill
             style={{ objectFit: "contain" }}
             onClick={() => {
