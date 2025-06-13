@@ -90,7 +90,7 @@ export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
     }
   });
 
-  console.log(`${album}: ${photoKeys.length}`);
+  console.log(`Retrieved ${album} with ${photoKeys.length} photos`);
   return photoKeys.map((key) => {
     return {
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,

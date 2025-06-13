@@ -25,17 +25,16 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
 
   const extractMetadata = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const exif = await exifr.parse(buffer, {
-      pick: ["DateTimeOriginal", "latitude", "longitude"],
-    });
+    const exif = await exifr.parse(buffer);
 
     const takenAt = exif?.DateTimeOriginal ?? new Date();
     const timestamp = takenAt.toISOString().replace(/[:T]/g, "-").split(".")[0];
-    const latitude = exif?.latitude?.toFixed(5) ?? "unknown";
-    const longitude = exif?.longitude?.toFixed(5) ?? "unknown";
-
-    console.log("File:", file);
-    console.log("EXIF:", await exifr.parse(file));
+    const latitude =
+      typeof exif?.latitude === "number" ? exif.latitude.toFixed(5) : "unknown";
+    const longitude =
+      typeof exif?.longitude === "number"
+        ? exif.longitude.toFixed(5)
+        : "unknown";
 
     return {
       name: file.name,
@@ -74,8 +73,6 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
     });
 
     const { urls } = await presignedUrlsRes.json();
-
-    console.log(urls);
 
     for (let i = 0; i < filesWithMeta.length; i++) {
       const { file } = filesWithMeta[i];
