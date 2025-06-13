@@ -51,8 +51,14 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
   const handleFileUpload = async () => {
     if (selectedFiles.length === 0) return;
 
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+
+    const filteredFiles = selectedFiles.filter((file) =>
+      allowedTypes.includes(file.type)
+    );
+
     const filesWithMeta = await Promise.all(
-      selectedFiles.map(async (file) => ({
+      filteredFiles.map(async (file) => ({
         file,
         ...(await extractMetadata(file)),
       }))
