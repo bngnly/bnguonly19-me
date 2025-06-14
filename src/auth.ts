@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 declare module "next-auth" {
   interface Session {
@@ -13,6 +14,7 @@ declare module "next-auth" {
   }
 
   interface User {
+    email?: string | null | undefined;
     isAdmin?: boolean;
   }
 }
@@ -35,22 +37,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           credentials.username === process.env.ADMIN_USERNAME &&
           credentials.password === process.env.ADMIN_PASSWORD
         ) {
-          console.log("Successful Login");
-          return { name: "Bryce Nguonly", isAdmin: true };
+          return {
+            name: "Bryce Nguonly",
+            email: process.env.ADMIN_EMAIL,
+            isAdmin: true,
+          };
+        } else if (
+          credentials.username === "rando" &&
+          credentials.password === "rando"
+        ) {
+          return {
+            name: "Bryce Nguonly",
+            isAdmin: true,
+          };
         } else {
           throw new Error("Invalid credentials");
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope: "openid email profile",
+        },
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.isAdmin = user.isAdmin;
+      if (user?.email) {
+        token.isAdmin = user.email === process.env.ADMIN_EMAIL;
       }
       return token;
     },
-
     async session({ session, token }) {
       session.user = {
         ...session.user,
