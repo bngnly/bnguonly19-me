@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { Photo } from "@/types/types";
 import { PhotoMarker } from "./PhotoMarker";
 import { RecenterMapButton } from "./RecenterMapButton";
+import { RecenterMapButton2 } from "./RecenterMapButton2";
 
 interface MapClientProps {
   photos: Photo[];
@@ -46,6 +47,7 @@ export default function MapClient({
           <PhotoMarker key={photo.key} photo={photo} />
         ))}
         <RecenterMapButton location={startLocation} />
+        <RecenterMapButton2 location={startLocation} />
       </MapContainer>
     </div>
   );
