@@ -23,9 +23,9 @@ export const getAllAlbumNames = async (): Promise<string[]> => {
       const s3res: ListObjectsV2CommandOutput = await s3client.send(command);
       if (s3res && s3res.CommonPrefixes) {
         albums.push(
-          ...s3res.CommonPrefixes.map((prefix) => prefix.Prefix).filter(
-            (key) => key !== undefined
-          )
+          ...s3res.CommonPrefixes.map((prefix) =>
+            prefix.Prefix?.replace(/\/$/, "")
+          ).filter((key): key is string => Boolean(key))
         );
       }
       continuationToken = s3res.NextContinuationToken;

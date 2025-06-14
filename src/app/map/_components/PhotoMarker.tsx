@@ -10,8 +10,6 @@ const customIcon = L.icon({
 });
 
 export function PhotoMarker({ photo }: { photo: Photo }) {
-  console.log("Rendering PhotoMarker for:", photo.key, photo.timestamp);
-
   return (
     <Marker position={[photo.latitude!, photo.longitude!]} icon={customIcon}>
       <Popup maxWidth={600} minWidth={300}>
