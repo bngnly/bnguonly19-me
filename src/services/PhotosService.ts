@@ -10,6 +10,50 @@ import {
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 
+function getPhotoInfo(key: string) {
+  const fileName = key.includes("/") ? key.split("/").pop() : key;
+
+  if (!fileName) {
+    return {
+      latitude: null,
+      longitude: null,
+      timestamp: null,
+    };
+  }
+
+  const parts = fileName.split("_");
+  if (parts.length < 3) {
+    return {
+      latitude: null,
+      longitude: null,
+      timestamp: null,
+    };
+  }
+
+  const timestampRaw = parts[0];
+  const latitudeRaw = parts[1];
+  const longitudeRaw = parts[2];
+
+  const latitude = isNaN(parseFloat(latitudeRaw))
+    ? null
+    : parseFloat(latitudeRaw);
+  const longitude = isNaN(parseFloat(longitudeRaw))
+    ? null
+    : parseFloat(longitudeRaw);
+
+  const timestampRegex = /^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/;
+
+  const timestamp = timestampRegex.test(timestampRaw)
+    ? new Date(timestampRaw.replace(timestampRegex, "$1-$2-$3T$4:$5:$6"))
+    : null;
+
+  return {
+    latitude,
+    longitude,
+    timestamp,
+  };
+}
+
 export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
   const allKeys: string[] = [];
 
@@ -50,10 +94,15 @@ export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
 
   console.log(`Retrieved ${selectedKeys.length} random photos`);
   return selectedKeys.map((key) => {
+    const { latitude, longitude, timestamp } = getPhotoInfo(key);
+
     return {
       key,
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
-      album: key.split("/")[0] + "/",
+      album: key.includes("/") ? key.split("/")[0] + "/" : "",
+      latitude,
+      longitude,
+      timestamp,
     };
   });
 };
@@ -96,10 +145,15 @@ export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
 
   console.log(`Retrieved ${album} with ${photoKeys.length} photos`);
   return photoKeys.map((key) => {
+    const { latitude, longitude, timestamp } = getPhotoInfo(key);
+
     return {
       key,
       url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
       album,
+      latitude,
+      longitude,
+      timestamp,
     };
   });
 };
