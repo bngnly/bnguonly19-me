@@ -117,6 +117,7 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
           accept="image/*"
           hidden
           onChange={handleFileChange}
+          disabled={progress !== null}
         />
       </IconButton>
       <IconButton onClick={handleFileUpload} disabled={progress !== null}>
