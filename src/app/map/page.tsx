@@ -7,9 +7,5 @@ export const dynamic = "force-dynamic";
 export default async function MapPage() {
   const photos: Photo[] = await getAlbumPhotos("here");
 
-  return (
-    <div className="w-full h-screen">
-      <MapWrapper photos={photos} />
-    </div>
-  );
+  return <MapWrapper photos={photos} />;
 }
