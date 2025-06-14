@@ -19,12 +19,13 @@ export function RecenterMapButton({ location }: RecenterButtonProps) {
       onAdd: function () {
         const container = L.DomUtil.create("div");
         container.className = "leaflet-control";
+        container.style.backgroundColor = "white";
+        container.style.borderRadius = "9999px";
 
         const root = createRoot(container);
         root.render(
           <IconButton
             onClick={() => map.panTo(location)}
-            className="bg-white z-[1000] hover:bg-gray-700"
           >
             <GpsFixed />
           </IconButton>
