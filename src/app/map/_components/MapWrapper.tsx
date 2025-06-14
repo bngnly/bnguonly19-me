@@ -26,7 +26,7 @@ export default function MapWrapper() {
     }
 
     fetchAlbums();
-  }, [albums]);
+  }, []);
 
   useEffect(() => {
     async function fetchPhotos() {
