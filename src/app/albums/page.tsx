@@ -1,18 +1,19 @@
-import { getAllAlbumNames } from "@/services/AlbumsService";
+import { getAllAlbums } from "@/services/AlbumsService";
 import Image from "next/image";
 import AlbumCard from "./_components/AlbumCard";
+import { Album } from "@/types/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function AlbumsPage() {
-  const albumNames: string[] = await getAllAlbumNames();
+  const albums: Album[] = await getAllAlbums();
 
   return (
     <div className="w-[90vw] grid grid-cols-1 md:grid-cols-2 gap-6">
-      {albumNames.length > 0 ? (
-        albumNames.reverse().map((albumName, _index) => (
+      {albums.length > 0 ? (
+        albums.reverse().map((album, _index) => (
           <div key={_index}>
-            <AlbumCard albumName={albumName} />
+            <AlbumCard album={album} />
           </div>
         ))
       ) : (

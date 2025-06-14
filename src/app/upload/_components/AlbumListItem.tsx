@@ -1,5 +1,6 @@
 "use client";
 
+import { Album } from "@/types/types";
 import { AddPhotoAlternate, FileUpload } from "@mui/icons-material";
 import {
   CircularProgress,
@@ -13,10 +14,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface AlbumListItemProps {
-  albumName: string;
+  album: Album;
 }
 
-export default function AlbumListItem({ albumName }: AlbumListItemProps) {
+export default function AlbumListItem({ album }: AlbumListItemProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState<number | null>(null);
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        albumName,
+        albumName: album.name,
         files: filesWithMeta.map(
           ({ name, timestamp, latitude, longitude, contentType }) => ({
             name,
@@ -104,9 +105,9 @@ export default function AlbumListItem({ albumName }: AlbumListItemProps) {
     <ListItem className="border-b">
       <ListItemButton>
         <ListItemText
-          primary={albumName}
+          primary={`${album.name} (${album.photosCount})`}
           secondary={`Files Selected: ${selectedFiles.length}`}
-          onClick={() => router.push(`/albums/${albumName}`)}
+          onClick={() => router.push(`/albums/${album.name}`)}
         />
       </ListItemButton>
       <IconButton component="label">

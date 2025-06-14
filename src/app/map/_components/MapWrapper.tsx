@@ -1,8 +1,8 @@
 "use client";
 
-import { getAllAlbumNames } from "@/services/AlbumsService";
+import { getAllAlbums } from "@/services/AlbumsService";
 import { getAlbumPhotos } from "@/services/PhotosService";
-import { Photo } from "@/types/types";
+import { Album, Photo } from "@/types/types";
 import { MenuItem, Select } from "@mui/material";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ const MapClient = dynamic(() => import("./MapClient"), {
 });
 
 export default function MapWrapper() {
-  const [albumNames, setAlbumNames] = useState<string[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [selectedAlbumName, setSelectedAlbumName] = useState<string | null>(
     null
   );
@@ -20,13 +20,13 @@ export default function MapWrapper() {
 
   useEffect(() => {
     async function fetchAlbums() {
-      const names = await getAllAlbumNames();
-      setAlbumNames(names.reverse());
-      setSelectedAlbumName(names[0] ?? null);
+      const fetchedAlbums: Album[] = await getAllAlbums();
+      setAlbums(fetchedAlbums.reverse());
+      setSelectedAlbumName(fetchedAlbums[0].name ?? null);
     }
 
     fetchAlbums();
-  }, []);
+  }, [albums]);
 
   useEffect(() => {
     async function fetchPhotos() {
@@ -48,9 +48,9 @@ export default function MapWrapper() {
           fullWidth
           className="z-[500] bg-white"
         >
-          {albumNames.map((albumName) => (
-            <MenuItem key={albumName} value={albumName}>
-              {albumName}
+          {albums.map((album) => (
+            <MenuItem key={album.name} value={album.name}>
+              {album.name} ({album.photosCount})
             </MenuItem>
           ))}
         </Select>

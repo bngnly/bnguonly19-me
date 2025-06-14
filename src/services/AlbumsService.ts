@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import s3client from "@/clients/s3client";
+import { Album } from "@/types/types";
 import {
   ListObjectsV2Command,
   ListObjectsV2CommandOutput,
@@ -9,31 +10,61 @@ import {
 } from "@aws-sdk/client-s3";
 import { revalidatePath } from "next/cache";
 
-export const getAllAlbumNames = async (): Promise<string[]> => {
-  const albums = [];
+export const getAllAlbums = async (): Promise<Album[]> => {
+  const albums: Album[] = [];
 
   try {
-    let continuationToken: string | undefined = undefined;
+    let albumResContinuationToken: string | undefined = undefined;
+
     do {
-      const command = new ListObjectsV2Command({
+      const listCommand = new ListObjectsV2Command({
         Bucket: process.env.AWS_BUCKET,
         Delimiter: "/",
-        ContinuationToken: continuationToken,
+        ContinuationToken: albumResContinuationToken,
       });
-      const s3res: ListObjectsV2CommandOutput = await s3client.send(command);
-      if (s3res && s3res.CommonPrefixes) {
-        albums.push(
-          ...s3res.CommonPrefixes.map((prefix) =>
-            prefix.Prefix?.replace(/\/$/, "")
-          ).filter((key): key is string => Boolean(key))
-        );
-      }
-      continuationToken = s3res.NextContinuationToken;
-    } while (continuationToken);
+
+      const albumNamesRes: ListObjectsV2CommandOutput = await s3client.send(
+        listCommand
+      );
+
+      const albumNames =
+        albumNamesRes.CommonPrefixes?.map((prefix) =>
+          prefix.Prefix?.replace(/\/$/, "")
+        ).filter((name): name is string => Boolean(name)) ?? [];
+
+      const albumsWithPhotoCount: Album[] = await Promise.all(
+        albumNames.map(async (albumName) => {
+          let count = 0;
+          let photoResToken: string | undefined = undefined;
+
+          do {
+            const photosRes: ListObjectsV2CommandOutput = await s3client.send(
+              new ListObjectsV2Command({
+                Bucket: process.env.AWS_BUCKET,
+                Prefix: `${albumName}/`,
+                ContinuationToken: photoResToken,
+              })
+            );
+
+            count +=
+              photosRes.Contents?.filter(
+                (photo) => photo.Key && !photo.Key.endsWith("/")
+              ).length ?? 0;
+
+            photoResToken = photosRes.NextContinuationToken;
+          } while (photoResToken);
+
+          return { name: albumName, photosCount: count };
+        })
+      );
+
+      albums.push(...albumsWithPhotoCount);
+      albumResContinuationToken = albumNamesRes.NextContinuationToken;
+    } while (albumResContinuationToken);
   } catch (error) {
-    console.log(error);
+    console.error("Failed to fetch albums:", error);
   }
-  console.log(`Retrieved ${albums.length} albums`);
+
   return albums;
 };
 
@@ -58,4 +89,9 @@ export async function createAlbum(albumName: string) {
   );
 
   revalidatePath("/upload");
+
+  return {
+    name: folderName,
+    photosCount: 0,
+  };
 }

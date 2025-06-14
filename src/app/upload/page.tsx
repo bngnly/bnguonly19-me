@@ -1,10 +1,11 @@
-import { getAllAlbumNames } from "@/services/AlbumsService";
+import { getAllAlbums } from "@/services/AlbumsService";
 import { List } from "@mui/material";
 import CreateAlbumForm from "./_components/CreateAlbumForm";
 import AlbumListItem from "./_components/AlbumListItem";
+import { Album } from "@/types/types";
 
 export default async function UploadPage() {
-  const albumNames = await getAllAlbumNames();
+  const albums: Album[] = await getAllAlbums();
 
   return (
     <>
@@ -12,8 +13,8 @@ export default async function UploadPage() {
         <h3>Albums</h3>
         <CreateAlbumForm />
         <List>
-          {albumNames.reverse().map((albumName, _index) => (
-            <AlbumListItem albumName={albumName} key={_index} />
+          {albums.reverse().map((album, _index) => (
+            <AlbumListItem album={album} key={_index} />
           ))}
         </List>
       </div>

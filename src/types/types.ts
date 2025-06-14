@@ -1,3 +1,8 @@
+export interface Album {
+  name: string;
+  photosCount: number;
+}
+
 export interface Photo {
   key: string;
   url: string;
