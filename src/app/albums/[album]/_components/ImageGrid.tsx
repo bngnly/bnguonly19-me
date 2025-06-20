@@ -7,6 +7,7 @@ import { Dialog } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import DeleteImageButton from "./DeleteImageButton";
+import { useSession } from "next-auth/react";
 
 export default function ImageGrid({ photos }: { photos: Photo[] }) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number | null>(
@@ -16,6 +17,7 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
     null
   );
+  const { data: session } = useSession();
 
   const closeImage = () => {
     setOpen(false);
@@ -137,9 +139,11 @@ export default function ImageGrid({ photos }: { photos: Photo[] }) {
           id={`photo-${index}`}
           className="relative w-full h-[70vh]"
         >
-          <div className="absolute top-2 right-2 z-10">
-            <DeleteImageButton photoKey={photo.key} />
-          </div>
+          {session?.user?.isAdmin && (
+            <div className="absolute top-2 right-2 z-10">
+              <DeleteImageButton photoKey={photo.key} />
+            </div>
+          )}
           <Image
             className="hover:cursor-zoom-in"
             src={photo.url}
