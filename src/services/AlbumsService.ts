@@ -68,7 +68,7 @@ export const getAllAlbums = async (): Promise<Album[]> => {
   return albums;
 };
 
-export async function createAlbum(albumName: string) {
+export const createAlbum = async (albumName: string): Promise<Album> => {
   const session = await auth();
   if (!session || !session.user?.isAdmin) {
     throw new Error("Unauthorized");
@@ -94,4 +94,4 @@ export async function createAlbum(albumName: string) {
     name: folderName,
     photosCount: 0,
   };
-}
+};
