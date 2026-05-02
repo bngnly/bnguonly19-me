@@ -98,7 +98,7 @@ export const getRandomPhotos = async (quantity: number): Promise<Photo[]> => {
 
     return {
       key,
-      url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
+      url: `${process.env.CDN_URL}/${key}`,
       album: key.includes("/") ? key.split("/")[0] + "/" : "",
       latitude,
       longitude,
@@ -149,7 +149,7 @@ export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
 
     return {
       key,
-      url: `https://${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net/${key}`,
+      url: `${process.env.CDN_URL}/${key}`,
       album,
       latitude,
       longitude,

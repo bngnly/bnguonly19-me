@@ -1,15 +1,21 @@
 import type { NextConfig } from "next";
 
+const cdnUrl = process.env.CDN_URL
+  ? new URL(process.env.CDN_URL)
+  : null;
+
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: `${process.env.AWS_CLOUDFRONT_ID}.cloudfront.net`,
-        pathname: "/**",
-      },
-    ],
+    remotePatterns: cdnUrl
+      ? [
+          {
+            protocol:
+              cdnUrl.protocol === "https:" ? "https" : "http",
+            hostname: cdnUrl.hostname,
+            pathname: "/**",
+          },
+        ]
+      : [],
   },
 };
 

@@ -21,5 +21,10 @@ export interface PhotoWithLocation {
   timestamp: Date | null;
 }
 
+export interface AlbumsManifest {
+  albums: Album[];
+  updatedAt: string;
+}
+
 export const MY_LOCATION = [34.0614, -118.308] as [number, number];
 export const DEFAULT_ZOOM = 10;
