@@ -1,27 +1,24 @@
 "use server";
 
 import s3client from "@/clients/s3client";
-import { Photo, AlbumManifest, AlbumsManifest, StoredPhoto } from "@/types/types";
+import { Photo, StoredPhoto } from "@/types/types";
 import {
   DeleteObjectCommand,
-  PutObjectCommand
 } from "@aws-sdk/client-s3";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import {
+  getGlobalAlbumsManifest,
+  getAlbumManifest,
+  putGlobalAlbumsManifest,
+  putAlbumManifest,
+} from "@/helpers/ManifestHelper";
 
 export const getRandomPhotos = async (
   quantity: number
 ): Promise<Photo[]> => {
   try {
-    const getGlobalAlbumsManifestResponse = await fetch(
-      `${process.env.CDN_URL}/albums/manifest.json`
-    );
-
-    if (!getGlobalAlbumsManifestResponse.ok) {
-      throw new Error(`Failed to fetch global manifest: ${getGlobalAlbumsManifestResponse.status}`);
-    }
-
-    const data: AlbumsManifest = await getGlobalAlbumsManifestResponse.json();
+    const data = await getGlobalAlbumsManifest();
 
     if (!data.albums?.length) return [];
 
@@ -35,20 +32,12 @@ export const getRandomPhotos = async (
     );
 
     const albumManifests = await Promise.all(
-      selectedAlbums.map(async (album) => {
-        const res = await fetch(
-          `${process.env.CDN_URL}/albums/${album.name}/manifest.json`
-        );
-
-        if (!res.ok) return null;
-
-        return (await res.json()) as AlbumManifest;
-      })
+      selectedAlbums.map((a) => getAlbumManifest(a.name))
     );
 
     const allPhotos: StoredPhoto[] = albumManifests
       .filter(Boolean)
-      .flatMap((album) => album!.photos);
+      .flatMap((m) => m.photos);
 
     if (!allPhotos.length) return [];
 
@@ -56,7 +45,6 @@ export const getRandomPhotos = async (
       .sort(() => 0.5 - Math.random())
       .slice(0, quantity);
 
-    // 7. Return formatted response
     return selected.map((photo) => ({
       key: photo.key,
       album: photo.key.split("/")[0],
@@ -73,15 +61,7 @@ export const getRandomPhotos = async (
 
 export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
   try {
-    const getAlbumsManifestResponse = await fetch(
-      `${process.env.CDN_URL}/albums/${album}/manifest.json`
-    );
-
-    if (!getAlbumsManifestResponse.ok) {
-      throw new Error(`Failed to fetch album manifest: ${getAlbumsManifestResponse.status}`);
-    }
-
-    const albumManifest: AlbumManifest = await getAlbumsManifestResponse.json();
+    const albumManifest = await getAlbumManifest(album);
 
     return albumManifest.photos.map((photo) => ({
       key: photo.key,
@@ -114,15 +94,7 @@ export async function deletePhoto(photoKey: string) {
       })
     );
 
-    const albumRes = await fetch(
-      `${process.env.CDN_URL}/albums/${albumName}/manifest.json`
-    );
-
-    if (!albumRes.ok) {
-      throw new Error("Failed to fetch album manifest");
-    }
-
-    const albumManifest: AlbumManifest = await albumRes.json();
+    const albumManifest = await getAlbumManifest(albumName);
 
     albumManifest.photos = albumManifest.photos.filter(
       (p) => p.key !== photoKey
@@ -130,24 +102,9 @@ export async function deletePhoto(photoKey: string) {
     albumManifest.photosCount = albumManifest.photos.length;
     albumManifest.updatedAt = new Date().toISOString();
 
-    await s3client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET,
-        Key: `albums/${albumName}/manifest.json`,
-        Body: JSON.stringify(albumManifest),
-        ContentType: "application/json",
-      })
-    );
+    await putAlbumManifest(albumName, albumManifest);
 
-    const globalRes = await fetch(
-      `${process.env.CDN_URL}/albums/manifest.json`
-    );
-
-    if (!globalRes.ok) {
-      throw new Error("Failed to fetch global manifest");
-    }
-
-    const globalManifest: AlbumsManifest = await globalRes.json();
+    const globalManifest = await getGlobalAlbumsManifest();
 
     const albumEntry = globalManifest.albums.find(
       (a) => a.name === albumName
@@ -162,18 +119,11 @@ export async function deletePhoto(photoKey: string) {
 
     globalManifest.updatedAt = new Date().toISOString();
 
-    await s3client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET,
-        Key: "albums/manifest.json",
-        Body: JSON.stringify(globalManifest),
-        ContentType: "application/json",
-      })
-    );
+    await putGlobalAlbumsManifest(globalManifest);
 
     revalidatePath(`/albums/${albumName}`);
     revalidatePath("/albums");
-    revalidatePath("/upload"); 
+    revalidatePath("/upload");
     revalidatePath("/");
 
     console.log(
