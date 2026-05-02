@@ -3,27 +3,28 @@ export interface Album {
   photosCount: number;
 }
 
-export interface Photo {
+export interface StoredPhoto {
   key: string;
-  url: string;
-  album: string;
   latitude: number | null;
   longitude: number | null;
-  timestamp: Date | null;
+  timestamp: string | null;
 }
 
-export interface PhotoWithLocation {
-  key: string;
+export interface Photo extends StoredPhoto {
   url: string;
   album: string;
-  latitude: number;
-  longitude: number;
-  timestamp: Date | null;
 }
 
 export interface AlbumsManifest {
   albums: Album[];
   updatedAt: string;
+}
+
+export interface AlbumManifest {
+  name: string;
+  photosCount: number;
+  updatedAt: string;
+  photos: StoredPhoto[];
 }
 
 export const MY_LOCATION = [34.0614, -118.308] as [number, number];

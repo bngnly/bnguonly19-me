@@ -1,0 +1,78 @@
+{
+    "albums": [
+        {
+            "name": "2022_03_Seattle",
+            "photosCount": 105
+        },
+        {
+            "name": "2022_07_Austin",
+            "photosCount": 93
+        },
+        {
+            "name": "2022_11_SanDiego",
+            "photosCount": 99
+        },
+        {
+            "name": "2023_02_10_SanFranciso",
+            "photosCount": 59
+        },
+        {
+            "name": "2023_02_13_Silverthorne",
+            "photosCount": 40
+        },
+        {
+            "name": "2023_02_20_Sedona",
+            "photosCount": 83
+        },
+        {
+            "name": "2023_02_27_BreckenridgeCO",
+            "photosCount": 54
+        },
+        {
+            "name": "2023_05_NapaCA",
+            "photosCount": 41
+        },
+        {
+            "name": "2023_06_ManhattanNY",
+            "photosCount": 55
+        },
+        {
+            "name": "2023_08_12_SD",
+            "photosCount": 147
+        },
+        {
+            "name": "2023_08_Iceland_v2",
+            "photosCount": 223
+        },
+        {
+            "name": "2024_01_Cambodia",
+            "photosCount": 335
+        },
+        {
+            "name": "2024_05_MotoEurope",
+            "photosCount": 313
+        },
+        {
+            "name": "2024_06_GenevaCH_v2",
+            "photosCount": 71
+        },
+        {
+            "name":"2024_07_02_Malaysia_v2",
+            "photosCount":165
+        },
+        {
+            "name": "2024_07_12_Thailand_v2"
+            ,"photosCount": 370
+        },
+        {
+            "name": "2025_06_27_SanFrancisco",
+            "photosCount": 70
+        },
+        {
+            "name": "2025_12_28_Hanoi_VN",
+            "photosCount": 90
+        }
+    
+    ],
+    "updatedAt": "2026-05-02T12:00:00Z"
+}
