@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PhotoWithLocation } from "@/types/types";
+import { Photo } from "@/types/types";
 
 type LocationClusterData = {
   count: number;
@@ -7,7 +7,7 @@ type LocationClusterData = {
 };
 
 export function useDensestPhotoLocation(
-  photos: PhotoWithLocation[]
+  photos: Photo[]
 ): [number, number] | null {
   return useMemo(() => {
     if (!photos.length) return null;

@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
-import { MY_LOCATION, PhotoWithLocation } from "@/types/types";
+import { MY_LOCATION, Photo } from "@/types/types";
 import { useDensestPhotoLocation } from "../_utils/useDensestLocation";
 
 interface FlyToDensestClusterProps {
-  photos: PhotoWithLocation[];
+  photos: Photo[];
   zoom: number;
 }
 

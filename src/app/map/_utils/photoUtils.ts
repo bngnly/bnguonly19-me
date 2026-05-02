@@ -1,8 +1,11 @@
-import { Photo, PhotoWithLocation } from "@/types/types";
+import { Photo } from "@/types/types";
 
-export function filterPhotosWithLocation(photos: Photo[]): PhotoWithLocation[] {
+export function filterPhotosWithLocation(
+  photos: Photo[]
+): Photo[] {
   return photos.filter(
-    (photo) =>
-      typeof photo.latitude === "number" && typeof photo.longitude === "number"
-  ) as PhotoWithLocation[];
+    (photo): photo is Photo =>
+      photo.latitude !== null &&
+      photo.longitude !== null
+  );
 }
