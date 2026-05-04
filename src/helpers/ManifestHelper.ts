@@ -2,13 +2,13 @@
 
 import s3client from "@/clients/s3client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { AlbumsManifest, AlbumManifest } from "@/types/types";
+import { GlobalAlbumsManifest, AlbumManifest } from "@/types/types";
 
 const BUCKET = process.env.AWS_BUCKET!;
 const CDN_URL = process.env.CDN_URL!;
 
 
-export async function getGlobalAlbumsManifest(): Promise<AlbumsManifest> {
+export async function getGlobalAlbumsManifest(): Promise<GlobalAlbumsManifest> {
     console.log(`[CDN] GET ${CDN_URL}/albums/manifest.json`);
 
     const res = await fetch(`${CDN_URL}/albums/manifest.json`, {
@@ -39,7 +39,7 @@ export async function getAlbumManifest(
     return res.json();
 }
 
-export async function putGlobalAlbumsManifest(manifest: AlbumsManifest) {
+export async function putGlobalAlbumsManifest(manifest: GlobalAlbumsManifest) {
     await s3client.send(
         new PutObjectCommand({
             Bucket: BUCKET,

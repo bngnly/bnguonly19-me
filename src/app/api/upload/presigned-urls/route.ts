@@ -3,45 +3,84 @@ import s3client from "@/clients/s3client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { ALLOWED_TYPES } from "@/helpers/constants"
+
+const VALID_ALBUM_NAMES_REGEX = /^[a-zA-Z0-9-_]+$/;
 
 export async function POST(req: Request) {
   const session = await auth();
+
   if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { files, albumName } = await req.json();
+  try {
+    const { files, albumName } = await req.json();
 
-  const urls = await Promise.all(
-    files.map(
-      async ({
-        name,
-        timestamp,
-        latitude,
-        longitude,
-        contentType,
-      }: {
-        name: string;
-        timestamp: string;
-        latitude: string;
-        longitude: string;
-        contentType: string;
-      }) => {
-        const safeName = name.replace(/\s+/g, "_");
-        const cleanedAlbum = albumName.replace(/\/+$/, "");
-        const key = `${cleanedAlbum}/${timestamp}_${latitude}_${longitude}_${safeName}`;
+    if (!Array.isArray(files) || files.length === 0) {
+      return NextResponse.json(
+        { error: "No files provided" },
+        { status: 400 }
+      );
+    }
 
-        const command = new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET,
-          Key: key,
-          ContentType: contentType,
-        });
+    if (!albumName || !VALID_ALBUM_NAMES_REGEX.test(albumName)) {
+      return NextResponse.json(
+        { error: "Invalid album name" },
+        { status: 400 }
+      );
+    }
 
-        const url = await getSignedUrl(s3client, command, { expiresIn: 300 });
-        return { url, key };
+    for (const file of files) {
+      if (!file.name || !file.contentType) {
+        return NextResponse.json(
+          { error: "Invalid file metadata" },
+          { status: 400 }
+        );
       }
-    )
-  );
+      if (!ALLOWED_TYPES.includes(file.contentType)) {
+        return NextResponse.json(
+          { error: `Invalid file type: ${file.contentType}` },
+          { status: 400 }
+        );
+      }
+    }
 
-  return NextResponse.json({ urls });
+    const uploads = await Promise.all(
+      files.map(
+        async ({
+          name,
+          contentType,
+        }: {
+          name: string;
+          contentType: string;
+        }) => {
+          const safeName = name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const key = `albums/${albumName}/${randomUUID()}_${safeName}`;
+
+          const command = new PutObjectCommand({
+            Bucket: process.env.AWS_BUCKET,
+            Key: key,
+            ContentType: contentType,
+          });
+
+          const url = await getSignedUrl(s3client, command, {
+            expiresIn: 60 * 10,
+          });
+
+          return { key, url };
+        }
+      )
+    );
+
+    return NextResponse.json({ uploads });
+  } catch (error) {
+    console.error("Presigned URL generation failed:", error);
+
+    return NextResponse.json(
+      { error: "Failed to generate presigned URLs" },
+      { status: 500 }
+    );
+  }
 }

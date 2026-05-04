@@ -12,6 +12,9 @@ import {
 import exifr from "exifr";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ALLOWED_TYPES } from "@/helpers/constants";
+
+const UPLOADED_PHOTOS_CONCURRENCY = 5;
 
 interface AlbumListItemProps {
   album: Album;
@@ -32,7 +35,7 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
     const exif = await exifr.parse(buffer);
 
     const takenAt = exif?.DateTimeOriginal ?? new Date();
-    const timestamp = takenAt.toISOString().replace(/[:T]/g, "-").split(".")[0];
+    const timestamp = takenAt.toISOString();
     const latitude =
       typeof exif?.latitude === "number" ? exif.latitude.toFixed(5) : "unknown";
     const longitude =
@@ -50,55 +53,117 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
   };
 
   const handleFileUpload = async () => {
-    if (selectedFiles.length === 0) return;
+    try {
+      if (selectedFiles.length === 0) return;
 
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      const filteredFiles = selectedFiles.filter((file) =>
+        ALLOWED_TYPES.includes(file.type)
+      );
 
-    const filteredFiles = selectedFiles.filter((file) =>
-      allowedTypes.includes(file.type)
-    );
+      const filesWithMeta = await Promise.all(
+        filteredFiles.map(async (file) => ({
+          file,
+          ...(await extractMetadata(file)),
+        }))
+      );
 
-    const filesWithMeta = await Promise.all(
-      filteredFiles.map(async (file) => ({
-        file,
-        ...(await extractMetadata(file)),
-      }))
-    );
-
-    const presignedUrlsRes = await fetch("/api/upload/presigned-urls", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        albumName: album.name,
-        files: filesWithMeta.map(
-          ({ name, timestamp, latitude, longitude, contentType }) => ({
-            name,
-            timestamp,
-            latitude,
-            longitude,
-            contentType,
-          })
-        ),
-      }),
-    });
-
-    const { urls } = await presignedUrlsRes.json();
-
-    for (let i = 0; i < filesWithMeta.length; i++) {
-      const { file } = filesWithMeta[i];
-      await fetch(urls[i].url, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type,
-        },
+      const presignedUrlsRes = await fetch("/api/upload/presigned-urls", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          albumName: album.name,
+          files: filesWithMeta.map(
+            ({ name, timestamp, latitude, longitude, contentType }) => ({
+              name,
+              timestamp,
+              latitude,
+              longitude,
+              contentType,
+            })
+          ),
+        }),
       });
 
-      setProgress(Math.round(((i + 1) / filesWithMeta.length) * 100));
-    }
+      if (!presignedUrlsRes.ok) {
+        throw new Error("Failed to get presigned URLs");
+      }
 
-    setSelectedFiles([]);
-    setTimeout(() => setProgress(null), 500);
+      const { uploads } = await presignedUrlsRes.json();
+
+      if (!uploads || !Array.isArray(uploads)) {
+        throw new Error("Invalid upload response");
+      }
+
+      if (uploads.length !== filesWithMeta.length) {
+        throw new Error("Mismatch between files and upload URLs");
+      }
+
+      let attempted = 0;
+      const successfulUploads: {
+        key: string;
+        timestamp: string | null;
+        latitude: number | null;
+        longitude: number | null;
+      }[] = [];
+
+      for (let i = 0; i < uploads.length; i += UPLOADED_PHOTOS_CONCURRENCY) {
+        const batch = uploads.slice(i, i + UPLOADED_PHOTOS_CONCURRENCY);
+
+        await Promise.all(
+          batch.map(async ({ url, key }: { url: string, key: string }, j: number) => {
+            const index = i + j;
+            const { file, timestamp, latitude, longitude } = filesWithMeta[index];
+
+            try {
+              const res = await fetch(url, {
+                method: "PUT",
+                body: file,
+                headers: {
+                  "Content-Type": file.type,
+                },
+              });
+
+              if (!res.ok) {
+                throw new Error(`Upload failed: ${file.name}`);
+              }
+
+              successfulUploads.push({
+                key,
+                timestamp: timestamp ?? null,
+                latitude: latitude === "unknown" ? null : Number(latitude),
+                longitude: longitude === "unknown" ? null : Number(longitude),
+              });
+
+
+            } catch (err) {
+              console.error(`Failed upload: ${file.name}`, err);
+            }
+            
+            attempted++;
+            setProgress(Math.round((attempted / uploads.length) * 100));
+          })
+        );
+      }
+
+      const completeResponse = await fetch("/api/upload/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          albumName: album.name,
+          uploads: successfulUploads,
+        }),
+      });
+
+      if (!completeResponse.ok) {
+        throw new Error("Failed to update manifest files for upload");
+      }
+
+      setSelectedFiles([]);
+      setTimeout(() => setProgress(null), 500);
+    } catch (error) {
+      console.log("Upload failed.", error);
+      setProgress(null);
+    }
   };
 
   return (

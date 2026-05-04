@@ -37,7 +37,7 @@ export const getRandomPhotos = async (
 
     const allPhotos: StoredPhoto[] = albumManifests
       .filter(Boolean)
-      .flatMap((m) => m.photos);
+      .flatMap((m) => m?.photos ?? []);
 
     if (!allPhotos.length) return [];
 
@@ -45,9 +45,10 @@ export const getRandomPhotos = async (
       .sort(() => 0.5 - Math.random())
       .slice(0, quantity);
 
+
     return selected.map((photo) => ({
       key: photo.key,
-      album: photo.key.split("/")[0],
+      album: photo.key.split("/")[1] ?? "unknown",
       latitude: photo.latitude,
       longitude: photo.longitude,
       timestamp: photo.timestamp,
@@ -85,7 +86,7 @@ export async function deletePhoto(photoKey: string) {
   }
 
   try {
-    const albumName = photoKey.split("/")[0];
+    const [, albumName] = photoKey.split("/");
 
     await s3client.send(
       new DeleteObjectCommand({
@@ -111,10 +112,7 @@ export async function deletePhoto(photoKey: string) {
     );
 
     if (albumEntry) {
-      albumEntry.photosCount = Math.max(
-        0,
-        albumEntry.photosCount - 1
-      );
+      albumEntry.photosCount = albumManifest.photosCount;
     }
 
     globalManifest.updatedAt = new Date().toISOString();

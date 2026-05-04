@@ -15,13 +15,12 @@ export interface Photo extends StoredPhoto {
   album: string;
 }
 
-export interface AlbumsManifest {
+export interface GlobalAlbumsManifest {
   albums: Album[];
   updatedAt: string;
 }
 
 export interface AlbumManifest {
-  name: string;
   photosCount: number;
   updatedAt: string;
   photos: StoredPhoto[];
