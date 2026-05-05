@@ -200,6 +200,12 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
             <CircularProgress size={24} />
           </div>
         )}
+        {uploadProgressPercentage !== null && (
+          <div className="absolute inset-0 flex items-center justify-center
+           bg-black/30 z-10">
+            <CircularProgress variant="determinate" value={uploadProgressPercentage} />
+          </div>
+        )}
         <ListItemButton disabled={isAlbumBeingModified}>
           <ListItemText
             primary={`${album.name} (${album.photosCount})`}
@@ -225,9 +231,6 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
         <IconButton onClick={handleFileUpload} disabled={isAlbumBeingModified}>
           <FileUpload />
         </IconButton>
-        {uploadProgressPercentage !== null && (
-          <CircularProgress variant="determinate" value={uploadProgressPercentage} />
-        )}
         <IconButton onClick={() => setIsDeleteAlbumDialogOpen(true)}
           disabled={isAlbumBeingModified}>
           <Delete />
@@ -238,7 +241,7 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
         <DialogTitle>Delete {album.name}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete "{album.name}"?
+            Are you sure you want to delete &quot;{album.name}&quot;?
             This will permanently remove all photos and cannot be undone.
           </DialogContentText>
         </DialogContent>
