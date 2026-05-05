@@ -1,10 +1,11 @@
 import { getAllAlbums } from "@/services/AlbumsService";
 import { getAlbumPhotos } from "@/services/PhotosService";
-import { Album, Photo } from "@/types/types";
+import { Album, PhotosPaginated } from "@/types/types";
 import Image from "next/image";
-import ImageGrid from "@/app/albums/[album]/_components/ImageGrid";
+import InfiniteImageGrid from "@/app/albums/[album]/_components/InfiniteImageGrid";
 
-export const revalidate = 604800;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 50;
 
 export async function generateStaticParams(): Promise<{ album: string }[]> {
   const albums: Album[] = await getAllAlbums();
@@ -14,19 +15,39 @@ export async function generateStaticParams(): Promise<{ album: string }[]> {
 
 export default async function AlbumPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ album: string }>;
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
-  const albumName: string = (await params).album;
-  const photos: Photo[] = await getAlbumPhotos(albumName);
+  const { album: albumName } = await params;
+  const sp = await searchParams;
+
+  const page = Math.max(1, Number(sp.page ?? "1"));
+
+  const rawPageSize = Number(sp.pageSize ?? DEFAULT_PAGE_SIZE);
+  const pageSize = Math.min(
+    MAX_PAGE_SIZE,
+    Math.max(1, Number.isNaN(rawPageSize) ? DEFAULT_PAGE_SIZE : rawPageSize)
+  );
+
+  const offset = (page - 1) * pageSize;
+
+  const photosPaginated: PhotosPaginated = await getAlbumPhotos(albumName, offset, pageSize);
 
   return (
     <div className="w-[90vw]">
       <h1 className="text-center">
-        {albumName} ({photos ? photos.length : 0})
+        {albumName} ({photosPaginated.total})
       </h1>
-      {photos.length > 0 ? (
-        <ImageGrid photos={photos} />
+      {photosPaginated.photos.length > 0 ? (
+        <InfiniteImageGrid
+          initialPhotos={photosPaginated.photos}
+          initialOffset={offset}
+          pageSize={pageSize}
+          album={albumName}
+          hasNextPage={photosPaginated.hasNextPage}
+        />
       ) : (
         <div>
           <Image

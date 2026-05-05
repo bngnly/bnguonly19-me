@@ -15,6 +15,12 @@ export interface Photo extends StoredPhoto {
   album: string;
 }
 
+export interface PhotosPaginated {
+  photos: Photo[];
+  total: number;
+  hasNextPage: boolean;
+}
+
 export interface GlobalAlbumsManifest {
   albums: Album[];
   updatedAt: string;

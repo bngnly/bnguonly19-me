@@ -31,7 +31,7 @@ export default function MapWrapper() {
   useEffect(() => {
     async function fetchPhotos() {
       if (!selectedAlbumName) return;
-      setPhotos(await getAlbumPhotos(selectedAlbumName));
+      setPhotos((await getAlbumPhotos(selectedAlbumName)).photos);
     }
 
     fetchPhotos();

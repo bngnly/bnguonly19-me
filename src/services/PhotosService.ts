@@ -1,7 +1,7 @@
 "use server";
 
 import s3client from "@/clients/s3client";
-import { Photo, StoredPhoto } from "@/types/types";
+import { Photo, StoredPhoto, PhotosPaginated } from "@/types/types";
 import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
@@ -60,21 +60,37 @@ export const getRandomPhotos = async (
   }
 };
 
-export const getAlbumPhotos = async (album: string): Promise<Photo[]> => {
+export const getAlbumPhotos = async (album: string,
+  offset: number = 0,
+  limit: number = 50
+): Promise<PhotosPaginated> => {
   try {
     const albumManifest = await getAlbumManifest(album);
+    const photos = albumManifest.photos;
 
-    return albumManifest.photos.map((photo) => ({
-      key: photo.key,
-      album,
-      latitude: photo.latitude,
-      longitude: photo.longitude,
-      timestamp: photo.timestamp,
-      url: `${process.env.CDN_URL}/${photo.key}`,
-    }));
+    const safeOffset = Math.max(0, Math.min(offset, photos.length));
+    const paginatedPhotos = photos.slice(safeOffset, safeOffset + limit);
+    const hasNextPage = offset + limit < photos.length;
+
+    return {
+      photos: paginatedPhotos.map((photo) => ({
+        key: photo.key,
+        album,
+        latitude: photo.latitude,
+        longitude: photo.longitude,
+        timestamp: photo.timestamp,
+        url: `${process.env.CDN_URL}/${photo.key}`,
+      })),
+      total: photos.length,
+      hasNextPage
+    };
   } catch (error) {
     console.error("Failed to fetch album photos:", error);
-    return [];
+    return {
+      photos: [],
+      total: 0,
+      hasNextPage: false,
+    };
   }
 };
 
