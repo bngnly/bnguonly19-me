@@ -17,7 +17,7 @@ export default function CreateAlbumForm() {
           await createAlbum(newAlbumName);
           setNewAlbumName("");
         } catch (e) {
-          console.log(e);
+          console.log(`Creating ${newAlbumName} failed: `, e);
         }
       }}
     >

@@ -1,9 +1,15 @@
 "use client";
 
 import { Album } from "@/types/types";
-import { AddPhotoAlternate, FileUpload } from "@mui/icons-material";
+import { AddPhotoAlternate, FileUpload, Delete } from "@mui/icons-material";
 import {
+  Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   ListItem,
   ListItemButton,
@@ -11,8 +17,9 @@ import {
 } from "@mui/material";
 import exifr from "exifr";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { ALLOWED_TYPES } from "@/helpers/constants";
+import { deleteAlbum } from "@/services/AlbumsService";
 
 const UPLOADED_PHOTOS_CONCURRENCY = 5;
 
@@ -21,9 +28,15 @@ interface AlbumListItemProps {
 }
 
 export default function AlbumListItem({ album }: AlbumListItemProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [progress, setProgress] = useState<number | null>(null);
   const router = useRouter();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadProgressPercentage, setUploadProgressPercentage] = useState<number | null>(null);
+
+  const [isDeleteAlbumDialogOpen, setIsDeleteAlbumDialogOpen] =
+    useState(false);
+  const [isDeletingAlbum, startDeleteAlbumTransition] = useTransition();
+
+  const isAlbumBeingModified = uploadProgressPercentage !== null || isDeletingAlbum;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -138,9 +151,9 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
             } catch (err) {
               console.error(`Failed upload: ${file.name}`, err);
             }
-            
+
             attempted++;
-            setProgress(Math.round((attempted / uploads.length) * 100));
+            setUploadProgressPercentage(Math.round((attempted / uploads.length) * 100));
           })
         );
       }
@@ -159,39 +172,90 @@ export default function AlbumListItem({ album }: AlbumListItemProps) {
       }
 
       setSelectedFiles([]);
-      setTimeout(() => setProgress(null), 500);
+      setTimeout(() => setUploadProgressPercentage(null), 500);
     } catch (error) {
       console.log("Upload failed.", error);
-      setProgress(null);
+      setUploadProgressPercentage(null);
     }
   };
 
+  const handleAlbumDelete = async () => {
+    setIsDeleteAlbumDialogOpen(false);
+    startDeleteAlbumTransition(async () => {
+      try {
+        await deleteAlbum(album.name);
+        router.refresh();
+      } catch (e) {
+        console.log(`Deleting album ${album.name} failed: `, e);
+      }
+    });
+  }
+
   return (
-    <ListItem className="border-b">
-      <ListItemButton>
-        <ListItemText
-          primary={`${album.name} (${album.photosCount})`}
-          secondary={`Files Selected: ${selectedFiles.length}`}
-          onClick={() => router.push(`/albums/${album.name}`)}
-        />
-      </ListItemButton>
-      <IconButton component="label">
-        <AddPhotoAlternate />
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          hidden
-          onChange={handleFileChange}
-          disabled={progress !== null}
-        />
-      </IconButton>
-      <IconButton onClick={handleFileUpload} disabled={progress !== null}>
-        <FileUpload />
-      </IconButton>
-      {progress !== null && (
-        <CircularProgress variant="determinate" value={progress} />
-      )}
-    </ListItem>
+    <>
+      <ListItem className="border-b relative">
+        {isDeletingAlbum && (
+          <div className="absolute inset-0 flex items-center justify-center
+           bg-black/30 z-10">
+            <CircularProgress size={24} />
+          </div>
+        )}
+        <ListItemButton disabled={isAlbumBeingModified}>
+          <ListItemText
+            primary={`${album.name} (${album.photosCount})`}
+            secondary={`Files Selected: ${selectedFiles.length}`}
+            onClick={() => {
+              if (!isAlbumBeingModified) {
+                router.push(`/albums/${album.name}`);
+              }
+            }}
+          />
+        </ListItemButton>
+        <IconButton component="label" disabled={isAlbumBeingModified}>
+          <AddPhotoAlternate />
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            hidden
+            onChange={handleFileChange}
+            disabled={isAlbumBeingModified}
+          />
+        </IconButton>
+        <IconButton onClick={handleFileUpload} disabled={isAlbumBeingModified}>
+          <FileUpload />
+        </IconButton>
+        {uploadProgressPercentage !== null && (
+          <CircularProgress variant="determinate" value={uploadProgressPercentage} />
+        )}
+        <IconButton onClick={() => setIsDeleteAlbumDialogOpen(true)}
+          disabled={isAlbumBeingModified}>
+          <Delete />
+        </IconButton>
+      </ListItem>
+      <Dialog open={isDeleteAlbumDialogOpen}
+        onClose={() => setIsDeleteAlbumDialogOpen(false)}>
+        <DialogTitle>Delete {album.name}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete "{album.name}"?
+            This will permanently remove all photos and cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteAlbumDialogOpen(false)} >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleAlbumDelete}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
